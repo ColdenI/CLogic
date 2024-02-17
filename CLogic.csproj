@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SignAssembly>False</SignAssembly>
+    <Company>Colden I Production | Code (Акулин А.Д.)</Company>
+    <Version>1.0.5.0</Version>
+  </PropertyGroup>
+
+</Project>
