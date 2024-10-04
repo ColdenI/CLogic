@@ -1,4 +1,7 @@
-﻿namespace CLogic;
+﻿using System;
+using System.Data.Common;
+
+namespace CLogic;
 
 public abstract class CMatrix
 {
@@ -11,9 +14,9 @@ public abstract class CMatrix
     /// <typeparam name="T"></typeparam>
     /// <param name="cMatrix"></param>
     /// <param name="matrixName"></param>
-    static public void ConsoleDraw<T>(in CMatrix<T> cMatrix, string matrixName = "Matrix")
+    static public void ConsoleDraw<T>(in CMatrix<T> cMatrix, string matrixName = "")
     {
-        Console.WriteLine("\n" + matrixName);
+        Console.WriteLine("\nMatrix: " + matrixName + $"[{cMatrix.Rows}x{cMatrix.Columns}] T:{cMatrix.IsTransposed}");
         for (int i = 0; i < cMatrix.Size[0]; i++)
         {
             for (int j = 0; j < cMatrix.Size[1]; j++)
@@ -98,7 +101,7 @@ public class CMatrix<T> : CMatrix
     /// Outputs the matrix values to the console.
     /// </summary>
     /// <param name="matrixName"></param>
-    public void ConsoleDraw(string nameMatrix = "Matrix") => ConsoleDraw(this, nameMatrix);
+    public void ConsoleDraw(string nameMatrix = "") => ConsoleDraw(this, nameMatrix);
 
     /// <summary>
     /// Returns the index of the first found passed element in the matrix, otherwise null.
@@ -132,6 +135,109 @@ public class CMatrix<T> : CMatrix
         }
         return arr;
     }
+
+    /// <summary>
+    /// Returns a row of the matrix by index.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public T[] GetRow(int index)
+    {
+        if (index >= this.Size[0]) throw new ArgumentOutOfRangeException("index");
+        T[] res = new T[this.Size[1]];
+        for (int i = 0; i < this.Size[1]; i++)
+            res[i] = this[index, i];
+        return res;
+    }
+    /// <summary>
+    /// Returns the column of the matrix by index.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public T[] GetColumn(int index)
+    {
+        if (index >= this.Size[1]) throw new ArgumentOutOfRangeException("index");
+        T[] res = new T[this.Size[0]];
+        for (int i = 0; i < this.Size[0]; i++)
+            res[i] = this[i, index];
+        return res;
+    }
+
+    /// <summary>
+    /// Deletes a row(s) from the current matrix.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public void RemoveRow(int index)
+    {
+        if(index >= Rows) throw new ArgumentOutOfRangeException("index");
+        List<T[]> rows = new List<T[]>();
+        for (int i = 0; i < Rows; i++)
+        {
+            T[] row = GetRow(i);
+            if (!equals(row, GetRow(index))) rows.Add(row);
+        }
+        T[,] arr = new T[rows.Count, Columns];
+        for (int i = 0; i < rows.Count; i++)
+            for(int j = 0; j < Columns; j++)
+            {
+                arr[i, j] = rows[i][j];
+                arr[i, j] = rows[i][j];
+            }
+        _matrix = arr;
+
+        static bool equals(T[] a, T[] b)
+        {
+            if(a.Length != b.Length) return false;
+            for(int i = 0; i < a.Length; i++)
+                if (!Equals(a[i], b[i])) return false;
+            return true;
+        }
+    }
+    /// <summary>
+    /// Deletes a row(s) from the current matrix.
+    /// </summary>
+    /// <param name="index"></param>
+    public void RemoveRow(params int[] index) { foreach (int i in CMath.BubbleSort(index).Reverse()) this.RemoveRow(i); }
+    /// <summary>
+    /// Removes a column(s) from the current matrix.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public void RemoveColumn(int index)
+    {
+        if (index >= Columns) throw new ArgumentOutOfRangeException("index");
+        List<T[]> columns = new List<T[]>();
+        for (int i = 0; i < Columns; i++)
+        {
+            T[] column = GetColumn(i);
+            if (!equals(column, GetColumn(index))) columns.Add(column);
+        }
+        //Console.WriteLine(columns.Count);
+        T[,] arr = new T[Rows, columns.Count];
+        for (int i = 0; i < columns.Count; i++)
+            for(int j = 0; j < Rows; j++)
+            {
+                arr[j, i] = columns[i][j];
+                arr[j, i] = columns[i][j];
+            }
+        _matrix = arr;
+
+        static bool equals(T[] a, T[] b)
+        {
+            if(a.Length != b.Length) return false;
+            for(int i = 0; i < a.Length; i++)
+                if (!Equals(a[i], b[i])) return false;
+            return true;
+        }
+    }
+    /// <summary>
+    /// Removes a column(s) from the current matrix.
+    /// </summary>
+    /// <param name="index"></param>
+    public void RemoveColumn(params int[] index) { foreach (int i in CMath.BubbleSort(index).Reverse()) this.RemoveColumn(i); }
 
     protected static CMatrixInt ConvertToCMatrixInt(CMatrix<T> v)
     {
@@ -203,39 +309,10 @@ public class CMatrixInt : CMatrix<int>
             return buf;
         }
     }
-    /// <summary>
-    /// Returns a row of the matrix by index.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public int[] GetRow(int index)
-    {
-        if (index >= this.Size[0]) throw new ArgumentOutOfRangeException("index");
-        int[] res = new int[this.Size[1]];
-        for (int i = 0; i < this.Size[1]; i++)
-            res[i] = this[index, i];
-        return res;
-    }
-    /// <summary>
-    /// Returns the column of the matrix by index.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public int[] GetСolumn(int index)
-    {
-        if (index >= this.Size[1]) throw new ArgumentOutOfRangeException("index");
-        int[] res = new int[this.Size[0]];
-        for (int i = 0; i < this.Size[0]; i++)
-            res[i] = this[i, index];
-        return res;
-    }
 
     public override CMatrixInt GetTranspose() => CMatrix<int>.ConvertToCMatrixInt(base.GetTranspose());
     public override CMatrixInt Copy() => CMatrix<int>.ConvertToCMatrixInt(base.Copy());
     public override CMatrixInt Transpose() => CMatrix<int>.ConvertToCMatrixInt(base.Transpose());
-
 
     #region operators
     // сложение, вычитание, инверсия
@@ -361,34 +438,6 @@ public class CMatrixDouble : CMatrix<double>
                     if (buf > this[i, j]) buf = this[i, j];
             return buf;
         }
-    }
-    /// <summary>
-    /// Returns a row of the matrix by index.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public double[] GetRow(int index)
-    {
-        if (index >= this.Size[0]) throw new ArgumentOutOfRangeException("index");
-        double[] res = new double[this.Size[1]];
-        for (int i = 0; i < this.Size[1]; i++)
-            res[i] = this[index, i];
-        return res;
-    }
-    /// <summary>
-    /// Returns the column of the matrix by index.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public double[] GetСolumn(int index)
-    {
-        if (index >= this.Size[1]) throw new ArgumentOutOfRangeException("index");
-        double[] res = new double[this.Size[0]];
-        for (int i = 0; i < this.Size[0]; i++)
-            res[i] = this[i, index];
-        return res;
     }
 
     public override CMatrixDouble GetTranspose() => CMatrix<double>.ConvertToCMatrixDouble(base.GetTranspose());
